@@ -12,6 +12,7 @@ void print_pattern(level) {
         return;
     }
     else if (counter + arr_of_lengths[level] < L) {
+        // Return earlier if we know this level of string won't be printed.
         counter += arr_of_lengths[level];
         return;
     }
@@ -49,7 +50,7 @@ void compute_length(int k) {
 
 int main() {
 
-    compute_length(50);
+    compute_length(50); // pre-compute the length of level 1~50 for later usage
 
     while (scanf("%lld%lld%lld", &K, &L, &R) != EOF) {
         counter = 0;
