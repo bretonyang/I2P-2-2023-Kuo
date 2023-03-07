@@ -2,17 +2,20 @@
 #include <stdlib.h>
 #include "function.h"
 
-Node* createList(int n) {
-    head = malloc(sizeof(Node));
-    head->number = 1;
-    head->next = NULL;
-    head->prev = NULL;
+Node* createNode(int number) {
+    Node* newNode = malloc(sizeof(Node));
+    newNode->number = number;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
+}
 
+Node* createList(int n) {
+    head = createNode(1);
     Node* tmp = head;
+
     for (int i = 2; i <= n; i++) {
-        Node* new_node = malloc(sizeof(Node));
-        new_node->number = i;
-        new_node->next = NULL;
+        Node* new_node = createNode(i);
         new_node->prev = tmp;
         tmp->next = new_node;
         tmp = tmp->next;
@@ -64,7 +67,7 @@ void solveJosephus(int n, int k) {
         cur_node->next->prev = cur_node->prev;
         free(cur_node);
         num_of_people_left--;
-        cur_node = tmp;
+        cur_node = tmp; // new cur_node is set to deleted node's prev node
     }
 }
 
