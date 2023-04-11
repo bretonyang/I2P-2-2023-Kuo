@@ -1,50 +1,45 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
 
-const int MAXN = 35;
-int n;
-int pre[MAXN], post[MAXN];
-long long dp[MAXN][MAXN];
+const int MAXN = 30;
 
-int find(int x) {
-    for (int i = n - 1; i >= 0; i--) {
-        if (post[i] == x) {
-            return i;
-        }
-    }
-    return -1;
-}
+int N;
+int preorder[MAXN], postorder[MAXN];
+int dp[MAXN][MAXN];
 
-long long solve(int l, int r) {
-    if (dp[l][r] != -1) {
-        return dp[l][r];
+int count(int i, int j) {
+    if (dp[i][j] > 0) {
+        return dp[i][j];
     }
-    if (l >= r) {
+    if (i >= j) {
         return 1;
     }
-    int cnt = find(pre[l + 1]);
-    long long ans = 0;
-    for (int i = l + 1; i < r; i++) {
-        if (find(pre[i]) == cnt - 1) {
-            ans += solve(l + 1, i) * solve(i + 1, r - 1);
+    int k = i + 1;
+    while (k < N && postorder[k - 1] != preorder[i + 1]) {
+        k++;
+    }
+    int res = 0;
+    for (int x = i + 1; x <= k; x++) {
+        for (int y = k; y < j; y++) {
+            res += count(x, y) * count(y + 1, j);
         }
     }
-    return dp[l][r] = ans;
+    dp[i][j] = res;
+    return res;
 }
-
 
 int main() {
-    memset(dp, -1, sizeof(dp));
-    cin >> n;
-    for (int i = 0; i < n; i++) {
-        cin >> pre[i];
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> preorder[i];
     }
-    for (int i = 0; i < n; i++) {
-        cin >> post[i];
+    for (int i = 0; i < N; i++) {
+        cin >> postorder[i];
     }
-    cout << solve(0, n - 1) << endl;
+    cout << count(0, N) << endl;
     return 0;
 }
+
 
 
 /**
