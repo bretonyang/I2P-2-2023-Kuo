@@ -1,5 +1,7 @@
 # Mini Project 1
 
+## Notes (Ch)
+
 1. "Mini_Project_1_Spec.pptx" 是 Mini Project 1 的規格說明。
 
 2. "calculator_loop" 和 "calculator_recursion" 是我們提供的 packages. 詳情請參考 "Mini_Project_1_Package_Introduction.pptx".
@@ -12,7 +14,7 @@
 
 6. 記憶體不會發生超過 256 bytes 的錯誤。
 
----
+## Notes (En)
 
 1. "Mini_Project_1_Spec.pptx" is the specification of Mini Project 1.
 
@@ -25,3 +27,9 @@
 5. Note that x, y, z's initial values are all 0 in the test cases of "parser test case". However, they won't be initialized as 0 in the exam. You have to take the initial values from memory. You can refer to page 17 of "Mini_Project_1_Spec.pptx"
 
 6. There will be no cases of memory exceeding 256 bytes.
+
+---
+
+## My Questions
+
+1. Why in `lex.c` we get the digit as long as `i < MAX_LEN`, shouldn't it be `i < MAX_LEN - 1` since we need to reserve last position for `\0`?

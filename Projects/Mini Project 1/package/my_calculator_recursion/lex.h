@@ -5,14 +5,16 @@
 
 // Token types
 typedef enum {
-    UNKNOWN, END, ENDFILE, 
+    UNKNOWN, END, ENDFILE,
     INT, ID,
     ADDSUB, MULDIV,
-    ASSIGN, 
-    LPAREN, RPAREN
+    ASSIGN, ADDSUB_ASSIGN,
+    LPAREN, RPAREN,
+    INCDEC,
+    AND, OR, XOR
 } TokenSet;
 
-// Test if a token matches the current token 
+// Test if a token matches the current token
 extern int match(TokenSet token);
 
 // Get the next token
