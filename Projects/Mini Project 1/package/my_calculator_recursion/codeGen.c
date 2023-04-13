@@ -3,6 +3,12 @@
 #include <string.h>
 #include "codeGen.h"
 
+static int has_variable(BTNode *root) {
+    if (root == NULL) return 0;
+    if (root->data == ID) return 1;
+    return has_variable(root->left) || has_variable(root->right);
+}
+
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
 
@@ -18,6 +24,24 @@ int evaluateTree(BTNode *root) {
                 rv = evaluateTree(root->right);
                 retval = setval(root->left->lexeme, rv);
                 break;
+            case ADDSUB_ASSIGN:
+                lv = evaluateTree(root->left);
+                rv = evaluateTree(root->right);
+                if (strcmp(root->lexeme, "+=") == 0) {
+                    retval = setval(root->left->lexeme, lv + rv);
+                } else if (strcmp(root->lexeme, "-=") == 0) {
+                    retval = setval(root->left->lexeme, lv - rv);
+                }
+                break;
+            case INCDEC:
+                rv = evaluateTree(root->right);
+                if (strcmp(root->lexeme, "++") == 0) {
+                    rv++;
+                } else if (strcmp(root->lexeme, "--") == 0) {
+                    rv--;
+                }
+                retval = setval(root->right->lexeme, rv);
+                break;
             case ADDSUB:
             case MULDIV:
                 lv = evaluateTree(root->left);
@@ -29,9 +53,28 @@ int evaluateTree(BTNode *root) {
                 } else if (strcmp(root->lexeme, "*") == 0) {
                     retval = lv * rv;
                 } else if (strcmp(root->lexeme, "/") == 0) {
-                    if (rv == 0)
-                        error(DIVZERO);
-                    retval = lv / rv;
+                    if (rv == 0) {
+                        if (has_variable(root->right)) {
+                            retval = 0;
+                        } else {
+                            error(DIVZERO);
+                        }
+                    } else {
+                        retval = lv / rv;
+                    }
+                }
+                break;
+            case AND:
+            case OR:
+            case XOR:
+                lv = evaluateTree(root->left);
+                rv = evaluateTree(root->right);
+                if (strcmp(root->lexeme,"&") == 0) {
+                    retval = lv & rv;
+                } else if (strcmp(root->lexeme, "|") == 0) {
+                    retval = lv | rv;
+                } else if (strcmp(root->lexeme, "^") == 0) {
+                    retval = lv ^ rv;
                 }
                 break;
             default:

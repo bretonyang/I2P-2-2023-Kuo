@@ -33,3 +33,5 @@
 ## My Questions
 
 1. Why in `lex.c` we get the digit as long as `i < MAX_LEN`, shouldn't it be `i < MAX_LEN - 1` since we need to reserve last position for `\0`?
+
+2. Is `ID` without assign after allowed in `assign_expr()`, or SyntaxError?
