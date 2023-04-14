@@ -9,6 +9,7 @@ static int has_variable(BTNode *root) {
     return has_variable(root->left) || has_variable(root->right);
 }
 
+/// NOTE: don't forget to set the values of children nodes before visiting them!!!
 int evaluateTree(BTNode *root) {
     int retval = 0, lv = 0, rv = 0;
     int address;
@@ -48,10 +49,8 @@ int evaluateTree(BTNode *root) {
                 }
                 break;
             case INCDEC:
-//                rv = evaluateTree(root->right);  <-- don't do this!!!
-                /// NOTE: Avoid visiting the ID node,
-                ///       which will MOV the ID into r0 and thus erase previous values.
-                rv = getval(root->right->lexeme);
+                root->right->val = root->val + 1;
+                rv = evaluateTree(root->right);
                 address = getMemoryPosition(root->right->lexeme);
                 if (strcmp(root->lexeme, "++") == 0) {
                     printf("MOV r%d 1\n", root->val);
