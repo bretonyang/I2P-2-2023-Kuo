@@ -10,6 +10,9 @@ Symbol table[TBLSIZE];
 /* Helper functions */
 
 void initTable(void) {
+    printf("MOV r0 [0]\n");
+    printf("MOV r1 [4]\n");
+    printf("MOV r2 [8]\n");
     strcpy(table[0].name, "x");
     table[0].val = 0;
     strcpy(table[1].name, "y");
@@ -17,6 +20,15 @@ void initTable(void) {
     strcpy(table[2].name, "z");
     table[2].val = 0;
     sbcount = 3;
+}
+
+int getMemoryPosition(const char *str) {
+    for (int i = 0; i < sbcount; i++)
+        if (strcmp(str, table[i].name) == 0)
+            return 4 * i;
+
+    error(UNDEFINED);
+    return 0;
 }
 
 int getval(char *str) {
@@ -253,20 +265,25 @@ void statement(void) {
     BTNode *node = NULL;
 
     if (match(ENDFILE)) { // statement := ENDFILE
+        printf("MOV r0 [0]\n");
+        printf("MOV r1 [4]\n");
+        printf("MOV r2 [8]\n");
+        printf("EXIT 0\n");
         exit(0);
     } else if (match(END)) { // statement := END
-        printf(">> ");
+//        printf(">> ");
         advance();
     } else { // statement := assign_expr END
         node = assign_expr();
         if (match(END)) {
-            printf("%d\n", evaluateTree(node));
-            printf("Prefix traversal: ");
-            printPrefix(node);
-            printf("\n");
+//            printf("%d\n", evaluateTree(node));
+//            printf("Prefix traversal: ");
+//            printPrefix(node);
+//            printf("\n");
+            evaluateTree(node);
             freeTree(node);
-            // Finish current statement, advance to next statement
-            printf(">> ");
+
+//            printf(">> ");
             advance();
         } else {
             error(SYNTAXERR);

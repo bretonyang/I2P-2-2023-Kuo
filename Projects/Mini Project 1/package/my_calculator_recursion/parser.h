@@ -30,7 +30,7 @@ typedef struct {
 // Structure of a tree node
 typedef struct _Node {
     TokenSet data;
-    int val;
+    int val; // current register index
     char lexeme[MAXLEN];
     struct _Node *left;
     struct _Node *right;
@@ -41,6 +41,9 @@ extern Symbol table[TBLSIZE];
 
 // Initialize the symbol table with builtin variables
 extern void initTable(void);
+
+// Get the memory position for a variable.
+extern int getMemoryPosition(const char *str);
 
 // Get the value of a variable
 extern int getval(char *str);
