@@ -240,9 +240,10 @@ void printPrefix(BTNode *root) {
 /* Helper functions */
 
 void initTable(void) {
-    printf("MOV r0 [0]\n");
-    printf("MOV r1 [4]\n");
-    printf("MOV r2 [8]\n");
+    // They're by default read in according to our algo
+//    printf("MOV r0 [0]\n");
+//    printf("MOV r1 [4]\n");
+//    printf("MOV r2 [8]\n");
     strcpy(table[0].name, "x");
     table[0].val = 0;
     strcpy(table[1].name, "y");
@@ -257,8 +258,7 @@ int getMemoryPosition(const char *str) {
         if (strcmp(str, table[i].name) == 0)
             return 4 * i;
 
-    error(UNDEFINED);
-    return 0;
+    error(NOTFOUND);
 }
 
 int getval(char *str) {
@@ -271,11 +271,7 @@ int getval(char *str) {
     if (sbcount >= TBLSIZE)
         error(RUNOUT);
 
-    error(UNDEFINED);
-//    strcpy(table[sbcount].name, str);
-//    table[sbcount].val = 0;
-//    sbcount++;
-    return 0;
+    error(NOTFOUND);
 }
 
 int setval(char *str, int val) {

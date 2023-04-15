@@ -27,8 +27,7 @@ int getMemoryPosition(const char *str) {
         if (strcmp(str, table[i].name) == 0)
             return 4 * i;
 
-    error(UNDEFINED);
-    return 0;
+    error(NOTFOUND);
 }
 
 int getval(char *str) {
@@ -41,11 +40,7 @@ int getval(char *str) {
     if (sbcount >= TBLSIZE)
         error(RUNOUT);
 
-    error(UNDEFINED);
-//    strcpy(table[sbcount].name, str);
-//    table[sbcount].val = 0;
-//    sbcount++;
-    return 0;
+    error(NOTFOUND);
 }
 
 int setval(char *str, int val) {
@@ -243,7 +238,7 @@ BTNode *or_expr_tail(BTNode *left) {
 /** assign_expr := ID ASSIGN assign_expr | ID ADDSUB_ASSIGN assign_expr | or_expr */
 BTNode *assign_expr(void) {
     BTNode *node = NULL, *left = NULL;
-    left = or_expr();
+    left = or_expr(); // If it's an assignment, this is only ID node, else or_expr node
     if (left->data == ID && match(ASSIGN)) { // assign_expr := ID ASSIGN assign_expr
         node = makeNode(ASSIGN, getLexeme());
         advance();

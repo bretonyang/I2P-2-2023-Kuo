@@ -5,7 +5,7 @@
 
 static TokenSet getToken(void);
 static TokenSet curToken = UNKNOWN;
-static char lexeme[MAXLEN];
+static char lexeme[MAXLEN]; // Q: Why isn't this MAXLEN + 1 ???
 
 TokenSet getToken(void)
 {
