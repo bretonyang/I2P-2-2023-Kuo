@@ -59,7 +59,8 @@ int evaluateTree(BTNode *root) {
                     printf("MOV [%d] r%d\n", address, root->val);
                     rv++;
                 } else if (strcmp(root->lexeme, "--") == 0) {
-                    // Note that our variable is in right, but we want it in left.
+                    // Note that our ID is the right child, but we want it labeled as left child.
+                    // (such that the result of SUB is directly stored in the ID node)
                     printf("MOV r%d 1\n", root->val + 1);
                     printf("MOV r%d [%d]\n", root->val, address);
                     printf("SUB r%d r%d\n", root->val, root->val + 1);
