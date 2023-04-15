@@ -33,18 +33,14 @@ TokenSet getToken(void)
             lexeme[1] = c;
             lexeme[2] = '\0';
             return INCDEC;
-        } else {
-            while (c == ' ' || c == '\t')
-                c = fgetc(stdin);
-            if (c == '=') { // += or -= with potential spaces between
-                lexeme[1] = c;
-                lexeme[2] = '\0';
-                return ADDSUB_ASSIGN;
-            } else { // + or -
-                ungetc(c, stdin);
-                lexeme[1] = '\0';
-                return ADDSUB;
-            }
+        } else if (c == '=') { // consecutive += or -=
+            lexeme[1] = c;
+            lexeme[2] = '\0';
+            return ADDSUB_ASSIGN;
+        } else { // + or -
+            ungetc(c, stdin);
+            lexeme[1] = '\0';
+            return ADDSUB;
         }
     } else if (c == '*' || c == '/') { /// MULDIV
         lexeme[0] = c;
