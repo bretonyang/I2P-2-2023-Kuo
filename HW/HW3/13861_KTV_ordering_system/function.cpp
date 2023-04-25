@@ -109,6 +109,7 @@ void ordering_system::insert(int k) {
                 tmp->next->pre = tmp->pre;
                 delete tmp;
                 tmp = next;
+                break; // since guaranteed only 1 ordered when inserted
             }
             else {
                 tmp = tmp->next;
