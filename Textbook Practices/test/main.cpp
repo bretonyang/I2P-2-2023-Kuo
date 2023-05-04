@@ -1,7 +1,7 @@
 #include <iostream>
+#include <algorithm>
 #include <string>
-
-#include "function.h"
+#include <map>
 
 using namespace std;
 
@@ -53,8 +53,57 @@ public:
     int getProt() { return prot; }
 };
 
+char *get_str() {
+//    char str[] = "abc";
+    char *str = new char[4];
+    str[0] = 'a', str[1] = 'b', str[2] = 'c', str[4] = '\0';
+    return str;
+}
+
+class TestBase {
+public:
+    int cnt;
+    TestBase() : cnt(69) {
+        cout << "base called" << endl;
+    }
+};
+
+class SubTest : public TestBase {
+public:
+    int arr[1024];
+    SubTest() = default;
+};
+
+void exchange(int &a, int &b) {
+    int tmp = a;
+    a = b;
+    b = tmp;
+}
+
 int main()
 {
+    int arr[10];
+    arr[0] = 10;
+    arr[1] = 20;
+    cout << arr[0] << ' ' << arr[1] << endl;
+    exchange(arr[0], arr[1]);
+    cout << arr[0] << ' ' << arr[1] << endl;
+
+//    SubTest t;
+//    cout << t.cnt << endl;
+
+//    string key, value;
+//
+//    map<string, string> person;
+//    while (cin >> key >> value) {
+//        person[key] = value;
+//    }
+//    for (auto it = begin(person); it != end(person); it++) {
+//        cout << it->first << ": " << it->second << endl;
+//    }
+
+//    cout << get_str() << endl;
+
 //    string str = "";
 //    cout << !str << endl;
 //    Array a;
@@ -62,12 +111,12 @@ int main()
 
 //    PublicDerived obj;
 //    ProtectedDerived obj;
-    PrivateDerived obj;
+//    PrivateDerived obj;
 //    cout << obj.pub << endl;
 //    cout << obj.prot << endl;
 //    cout << obj.pvt << endl;
-    cout << obj.getPub() << endl;
-    cout << obj.getProt() << endl;
+//    cout << obj.getPub() << endl;
+//    cout << obj.getProt() << endl;
 //    cout << obj.printPVT() << endl;
 //    cout << obj.getPVT() << endl;
 
