@@ -59,16 +59,18 @@ void KuoYangPresent::ProgrammingTanoshi() {
 void KuoYangPresent::KuoYangTeTe() { /* ??? */ }
 
 int calc(int val, int k, int times) {
-//    while (times > 0 && val > k) {
-//        val = val % k;
-//        times--;
-//    }
-//    return val;
-    for (int i = 0; i < times; i++) {
-        val %= k;
-        if (val <= 1) break;
+    while (times > 0 && val >= k) {
+        val = val % k;
+        times--;
     }
     return val;
+
+    // Why does the following cause TLE?
+//    for (int i = 0; i < times; i++) {
+//        if (val <= 1) break;
+//        val %= k;
+//    }
+//    return val;
 }
 
 // each number has to be mod by (now - tag) times
