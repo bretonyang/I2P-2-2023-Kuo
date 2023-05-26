@@ -27,6 +27,7 @@ public:
 
     bool isShovel = false;
     bool isShifter = false;
+    bool isSpell = false;
     bool shifting = false;
     std::string type;
 

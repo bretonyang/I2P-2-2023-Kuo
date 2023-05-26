@@ -117,3 +117,4 @@ My implementation:
 3. Add turret with circular orbit bullets
 4. Shovel
 5. Shifter
+6. Add BossEnemy and Slowness Spell

@@ -23,6 +23,8 @@
 #include "Shovel.hpp"
 #include "Shifter.hpp"
 #include "DoubleGunTurret.hpp"
+#include "Spell.hpp"
+
 // Enemy
 #include "RedNormalEnemy.hpp"
 #include "DiceOneEnemy.hpp"
@@ -31,6 +33,7 @@
 
 #include "PlayScene.hpp"
 #include "Resources.hpp"
+#include "Collider.hpp"
 #include "Sprite.hpp"
 #include "Turret.hpp"
 #include "TurretButton.hpp"
@@ -251,7 +254,30 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 
 	// left click
 	if (button & 1) {
-		if (mapState[y][x] != TILE_OCCUPIED) {
+        if (preview && preview->type == "spell") {
+            // freeze enemies within range
+            for (auto& it : EnemyGroup->GetObjects()) {
+                Enemy* enemy = dynamic_cast<Enemy*>(it);
+                Engine::Point center = Engine::Point(x * BlockSize + BlockSize / 2, y * BlockSize + BlockSize / 2);
+                if (Engine::Collider::IsCircleOverlap(center, preview->CollisionRadius, enemy->Position, enemy->CollisionRadius))
+                    enemy->Slow(0.1, Spell::SpellDuration);
+            }
+
+            // Purchase, for free is shifting
+            EarnMoney(-preview->GetPrice());
+
+			// Remove Preview.
+			preview->GetObjectIterator()->first = false;
+			UIGroup->RemoveObject(preview->GetObjectIterator());
+
+			// To keep responding when paused.
+			preview->Update(0);
+			// Remove Preview.
+			preview = nullptr;
+
+			OnMouseMove(mx, my);
+        }
+		else if (mapState[y][x] != TILE_OCCUPIED) {
 			if (!preview || preview->isShovel || preview->isShifter)
 				return;
 			// Check if valid.
@@ -346,7 +372,8 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
                 else if (tur->type == "machineGunTurret") btnId = 1;
                 else if (tur->type == "shovel") btnId = 2;
                 else if (tur->type == "shifter") btnId = 3;
-                else if (tur->type == "doubleGunTurret") btnId = 4;
+                else if (tur->type == "spell") btnId = 4;
+                else if (tur->type == "doubleGunTurret") btnId = 10;
             }
 
             // Remove Preview.
@@ -505,6 +532,8 @@ void PlayScene::ConstructUI() {
 	ConstructButton(1, "play/turret-1.png", MachineGunTurret::Price);
 	ConstructButton(2, "play/shovel.png", Shovel::Price);
 	ConstructButton(3, "play/shifter.png", Shifter::Price);
+	// ConstructButton(10, "play/turret-2.png", DoubleGunTurret::Price);
+	ConstructButton(4, "play/spell.png", Spell::Price);
 
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -540,8 +569,10 @@ void PlayScene::UIBtnClicked(int id, bool ignoreMoney) {
         preview = new Shovel(0, 0);
     else if (id == 3)
         preview = new Shifter(0, 0);
-    else if (id == 4 && (ignoreMoney || money >= DoubleGunTurret::Price))
+    else if (id == 10 && (ignoreMoney || money >= DoubleGunTurret::Price))
         preview = new DoubleGunTurret(0, 0);
+    else if (id == 4 && (ignoreMoney || money >= Spell::Price))
+        preview = new Spell(0, 0);
 	if (!preview)
 		return;
 	preview->Position = Engine::GameEngine::GetInstance().GetMousePosition();
