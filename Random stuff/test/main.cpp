@@ -16,7 +16,7 @@ public:
     }
 
     const string operator()(const string str) {
-        return str + " SMILY!";
+        return str + " STRING ADD-ON!!!";
     }
 };
 

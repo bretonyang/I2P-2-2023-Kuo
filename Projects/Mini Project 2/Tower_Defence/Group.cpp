@@ -18,9 +18,11 @@ namespace Engine {
 		objects.emplace(it, shouldDelete, obj);
 		obj->objectIterator = std::prev(it);
 	}
+
 	Group::~Group() {
 		Clear();
 	}
+
 	void Group::Clear() {
 		for (auto& it : objects) {
 			if (it.first) delete it.second;
@@ -31,6 +33,7 @@ namespace Engine {
 		}
 		controls.clear();
 	}
+
 	void Group::Update(float deltaTime) {
 		for (auto it = objects.begin(); it != objects.end();) {
 			auto preIt = it++;
@@ -44,6 +47,7 @@ namespace Engine {
 				it.second->Draw();
 		}
 	}
+
 	void Group::OnKeyDown(int keyCode) {
 		for (auto it = controls.begin(); it != controls.end();) {
 			auto preIt = it++;
@@ -80,6 +84,7 @@ namespace Engine {
 			preIt->second->OnMouseScroll(mx, my, delta);
 		}
 	}
+
 	void Group::RemoveObject(std::list<std::pair<bool, IObject*>>::iterator it) {
 		if (it->first) delete it->second;
 		objects.erase(it);
@@ -92,6 +97,7 @@ namespace Engine {
 		RemoveControl(ctrlIt);
 		RemoveObject(objIt);
 	}
+
 	void Group::AddNewObject(IObject* obj) {
 		addObject(true, obj);
 	}
@@ -122,6 +128,7 @@ namespace Engine {
 		addObject(false, dynamic_cast<IObject*>(&ctrl));
 		addControl(false, &ctrl);
 	}
+
 	std::list<IObject*> Group::GetObjects() {
 		std::list<IObject*> list;
 		for (auto& it : objects)

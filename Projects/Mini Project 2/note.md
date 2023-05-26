@@ -82,24 +82,38 @@ Go to `Project > Build options ...`
 6. Find bug in win scene
 
 ```txt
-2 3 4
-1 2.5 5
+4 10 2
+2 3 3
+3 2.5 4
 0 2 1
-2 1 5
-0 2 1
-2 2.5 10
+1 1 3
+2 2 1
+3 2.5 2
 0 6 1
 1 1 1
 0 2 1
-1 2.5 20
+1 2.5 5
 0 12 1
-2 1 5
+3 1 5
 0 2 1
-1 2.5 20
-0 12 1
+2 2.5 4
+3 8 1
 1 1 10
 0 2 1
 2 1 1
-0 2 1
-2 2.5 10
+0 10 1
+4 10 2
 ```
+
+Notes:
+
+1. Enemy file each row: enemyType, timeInterval, repeatTimes
+   (where 0 means nothing, 1 means enemy 1, etc.)
+
+My implementation:
+
+1. Add DiceTwoEnemy which summons a DiceOneEnemy when it dies.
+2. Merge 2 MachineGunTurret to generate a DoubleGunTurret, which shoots 2 bullets at once.
+3. Add turret with circular orbit bullets
+4. Shovel
+5. Shifter

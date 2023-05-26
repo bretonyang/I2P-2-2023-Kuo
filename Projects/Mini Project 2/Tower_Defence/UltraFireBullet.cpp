@@ -4,21 +4,22 @@
 
 #include "DirtyEffect.hpp"
 #include "Enemy.hpp"
-#include "FireBullet.hpp"
+#include "UltraFireBullet.hpp"
 #include "Group.hpp"
 #include "PlayScene.hpp"
 #include "Point.hpp"
 
 class Turret;
 
-FireBullet::FireBullet(Engine::Point position, Engine::Point forwardDirection, float rotation, Turret* parent) :
-    Bullet("play/bullet-1.png", 300, 2, position, forwardDirection, rotation - ALLEGRO_PI / 2, parent) {
+UltraFireBullet::UltraFireBullet(Engine::Point position, Engine::Point forwardDirection, float rotation, Turret* parent) :
+    Bullet("play/bullet-2.png", 350, 4, position, forwardDirection, rotation - ALLEGRO_PI / 2, parent) {
 }
-void FireBullet::OnExplode(Enemy* enemy) {
+void UltraFireBullet::OnExplode(Enemy* enemy) {
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> dist(2, 5);
     getPlayScene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-1.png", dist(rng), enemy->Position.x, enemy->Position.y));
     enemy->Slow(0.5, 5);
 }
+
 

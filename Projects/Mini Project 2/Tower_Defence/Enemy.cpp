@@ -16,10 +16,12 @@
 #include "LOG.hpp"
 #include "PlayScene.hpp"
 #include "Turret.hpp"
+#include "DiceOneEnemy.hpp"
 
 PlayScene* Enemy::getPlayScene() {
 	return dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetActiveScene());
 }
+
 void Enemy::OnExplode() {
 	getPlayScene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
 	std::random_device dev;
@@ -31,14 +33,16 @@ void Enemy::OnExplode() {
 		getPlayScene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
 	}
 }
+
 Enemy::Enemy(std::string img, float x, float y, float radius, float speed, float hp, int money) :
 	Engine::Sprite(img, x, y), speed(speed), hp(hp), money(money), maxSpeed(speed), slowRemainTime(0) {
 	CollisionRadius = radius;
 	reachEndTime = 0;
 }
+
 void Enemy::Hit(float damage) {
 	hp -= damage;
-	if (hp <= 0) {
+	if (hp <= 0 && diceTwoSummonBefore) {
 		OnExplode();
 		// Remove all turret's reference to target.
 		for (auto& it: lockedTurrets)
@@ -49,7 +53,15 @@ void Enemy::Hit(float damage) {
 		getPlayScene()->EnemyGroup->RemoveObject(objectIterator);
 		AudioHelper::PlayAudio("explosion.wav");
 	}
+	else if (hp <= 0) {
+        OnExplode();
+        diceTwoSummonBefore = true;
+        hp = 20.0;
+        money = 5;
+        speed = 60;
+	}
 }
+
 void Enemy::UpdatePath(const std::vector<std::vector<int>>& mapDistance) {
 	int x = static_cast<int>(floor(Position.x / PlayScene::BlockSize));
 	int y = static_cast<int>(floor(Position.y / PlayScene::BlockSize));
@@ -83,6 +95,7 @@ void Enemy::UpdatePath(const std::vector<std::vector<int>>& mapDistance) {
 	}
 	path[0] = PlayScene::EndGridPoint;
 }
+
 void Enemy::Update(float deltaTime) {
 	// Slow effect.
 	SlowEffect(deltaTime);
@@ -118,6 +131,7 @@ void Enemy::Update(float deltaTime) {
 	Rotation = atan2(Velocity.y, Velocity.x);
 	Sprite::Update(deltaTime);
 }
+
 void Enemy::Draw() const {
 	Sprite::Draw();
 	if (PlayScene::DebugMode) {
@@ -125,10 +139,12 @@ void Enemy::Draw() const {
 		al_draw_circle(Position.x, Position.y, CollisionRadius, al_map_rgb(255, 0, 0), 2);
 	}
 }
+
 void Enemy::Slow(float slowFactor, float slowTime) {
 	speed = maxSpeed * slowFactor;
 	slowRemainTime = slowTime;
 }
+
 void Enemy::SlowEffect(float deltaTime) {
 	if (slowRemainTime > 0) {
 		slowRemainTime -= deltaTime;

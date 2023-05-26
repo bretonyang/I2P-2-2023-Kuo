@@ -20,15 +20,22 @@
 #include "PlugGunTurret.hpp"
 #include "MachineGunTurret.hpp"
 #include "Plane.hpp"
+#include "Shovel.hpp"
+#include "Shifter.hpp"
+#include "DoubleGunTurret.hpp"
 // Enemy
 #include "RedNormalEnemy.hpp"
 #include "DiceOneEnemy.hpp"
+#include "DiceTwoEnemy.hpp"
+#include "BossEnemy.hpp"
+
 #include "PlayScene.hpp"
 #include "Resources.hpp"
 #include "Sprite.hpp"
 #include "Turret.hpp"
 #include "TurretButton.hpp"
 #include "LOG.hpp"
+
 
 bool PlayScene::DebugMode = false;
 const std::vector<Engine::Point> PlayScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
@@ -39,9 +46,12 @@ const Engine::Point PlayScene::SpawnGridPoint = Engine::Point(-1, 0);
 const Engine::Point PlayScene::EndGridPoint = Engine::Point(MapWidth, MapHeight - 1);
 // TODO 5 (2/3): Set the cheat code correctly.
 const std::vector<int> PlayScene::code = { ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_ENTER };
+
+
 Engine::Point PlayScene::GetClientSize() {
 	return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
+
 void PlayScene::Initialize() {
 	// TODO 6 (1/2): There's a bug in this file, which crashes the game when you win. Try to find it.
 	// TODO 6 (2/2): There's a bug in this file, which doesn't update the player's life correctly when getting the first attack. Try to find it.
@@ -81,6 +91,7 @@ void PlayScene::Initialize() {
     else
         bgmInstance = AudioHelper::PlaySample("play.ogg", true, 0.0);
 }
+
 void PlayScene::Terminate() {
 	AudioHelper::StopBGM(bgmId);
 	AudioHelper::StopSample(deathBGMInstance);
@@ -89,6 +100,7 @@ void PlayScene::Terminate() {
 	bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
 	IScene::Terminate();
 }
+
 void PlayScene::Update(float deltaTime) {
 	// If we use deltaTime directly, then we might have Bullet-through-paper problem.
 	// Reference: Bullet-Through-Paper
@@ -169,7 +181,13 @@ void PlayScene::Update(float deltaTime) {
 		// The format is "[EnemyId] [TimeDelay] [Repeat]".
 		// TODO 2 (3/3): Enable the creation of the new enemy.
 		case 2:
-            EnemyGroup->AddNewObject(enemy = new DiceOneEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+		    EnemyGroup->AddNewObject(enemy = new DiceOneEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+            break;
+        case 3:
+            EnemyGroup->AddNewObject(enemy = new DiceTwoEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
+            break;
+        case 4:
+            EnemyGroup->AddNewObject(enemy = new BossEnemy(SpawnCoordinate.x, SpawnCoordinate.y));
             break;
 		default:
 			continue;
@@ -184,6 +202,7 @@ void PlayScene::Update(float deltaTime) {
 		preview->Update(deltaTime);
 	}
 }
+
 void PlayScene::Draw() const {
 	IScene::Draw();
 	if (DebugMode) {
@@ -200,14 +219,16 @@ void PlayScene::Draw() const {
 		}
 	}
 }
+
 void PlayScene::OnMouseDown(int button, int mx, int my) {
 	if ((button & 1) && !imgTarget->Visible && preview) {
 		// Cancel turret construct.
 		UIGroup->RemoveObject(preview->GetObjectIterator());
 		preview = nullptr;
 	}
-	IScene::OnMouseDown(button, mx, my);
+	IScene::OnMouseDown(button, mx, my); // so that IScene objects and controls can handle mouseDown
 }
+
 void PlayScene::OnMouseMove(int mx, int my) {
 	IScene::OnMouseMove(mx, my);
 	const int x = mx / BlockSize;
@@ -220,15 +241,18 @@ void PlayScene::OnMouseMove(int mx, int my) {
 	imgTarget->Position.x = x * BlockSize;
 	imgTarget->Position.y = y * BlockSize;
 }
+
 void PlayScene::OnMouseUp(int button, int mx, int my) {
 	IScene::OnMouseUp(button, mx, my);
 	if (!imgTarget->Visible)
 		return;
 	const int x = mx / BlockSize;
 	const int y = my / BlockSize;
+
+	// left click
 	if (button & 1) {
 		if (mapState[y][x] != TILE_OCCUPIED) {
-			if (!preview)
+			if (!preview || preview->isShovel || preview->isShifter)
 				return;
 			// Check if valid.
 			if (!CheckSpaceValid(x, y)) {
@@ -237,11 +261,15 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 				sprite->Rotation = 0;
 				return;
 			}
-			// Purchase.
-			EarnMoney(-preview->GetPrice());
+
+			// Purchase, for free is shifting
+			if (!preview->shifting)
+                EarnMoney(-preview->GetPrice());
+
 			// Remove Preview.
 			preview->GetObjectIterator()->first = false;
 			UIGroup->RemoveObject(preview->GetObjectIterator());
+
 			// Construct real turret.
 			preview->Position.x = x * BlockSize + BlockSize / 2;
 			preview->Position.y = y * BlockSize + BlockSize / 2;
@@ -249,6 +277,11 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 			preview->Preview = false;
 			preview->Tint = al_map_rgba(255, 255, 255, 255);
 			TowerGroup->AddNewObject(preview);
+
+			// Add turret to turretArray
+			turretArray[y][x] = preview;
+			preview->shifting = false;
+
 			// To keep responding when paused.
 			preview->Update(0);
 			// Remove Preview.
@@ -257,8 +290,91 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 			mapState[y][x] = TILE_OCCUPIED;
 			OnMouseMove(mx, my);
 		}
+		// if tile occupied, and:
+		else if ((turretArray[y][x]->type == "machineGunTurret") && (preview->type == "machineGunTurret")) {
+            /// Merge machine guns for double guns
+            Turret* tur = turretArray[y][x];
+
+            // purchase
+            EarnMoney(-preview->GetPrice());
+
+            // Remove Preview.
+			preview->GetObjectIterator()->first = false;
+			UIGroup->RemoveObject(preview->GetObjectIterator());
+			// Remove turret from group
+			TowerGroup->RemoveObject(tur->GetObjectIterator());
+
+			// Construct real turret.
+			preview = new DoubleGunTurret(0, 0);
+			preview->Position.x = x * BlockSize + BlockSize / 2;
+			preview->Position.y = y * BlockSize + BlockSize / 2;
+			preview->Enabled = true;
+			preview->Preview = false;
+			preview->Tint = al_map_rgba(255, 255, 255, 255);
+			TowerGroup->AddNewObject(preview);
+
+			// Add turret to turretArray
+			turretArray[y][x] = preview;
+			preview->shifting = false;
+
+			// To keep responding when paused.
+			preview->Update(0);
+			// Remove Preview.
+			preview = nullptr;
+
+			mapState[y][x] = TILE_OCCUPIED;
+			OnMouseMove(mx, my);
+		}
+		else {
+            if (!preview || (!preview->isShovel && !preview->isShifter) || turretArray[y][x] == nullptr)
+				return;
+            // tile occupied && is turret && preview is shovel
+            Turret* tur = turretArray[y][x];
+
+            // Doesn't allow shovel on doubleGun, but shift is allowed.
+            if (preview->isShovel && tur->type == "doubleGunTurret")
+                return;
+
+            // Get back money
+            if (preview->isShovel)
+                EarnMoney((tur->GetPrice()) / 2);
+
+            bool shift = preview->isShifter;
+            int btnId = 0;
+            if (shift) {
+                if (tur->type == "plugGunTurret") btnId = 0;
+                else if (tur->type == "machineGunTurret") btnId = 1;
+                else if (tur->type == "shovel") btnId = 2;
+                else if (tur->type == "shifter") btnId = 3;
+                else if (tur->type == "doubleGunTurret") btnId = 4;
+            }
+
+            // Remove Preview.
+			preview->GetObjectIterator()->first = false;
+			UIGroup->RemoveObject(preview->GetObjectIterator());
+
+			// Remove turret from array
+			turretArray[y][x] = nullptr;
+
+			// Remove turret from group
+			TowerGroup->RemoveObject(tur->GetObjectIterator());
+			mapState[y][x] = TILE_FLOOR;
+
+			// To keep responding when paused.
+			preview->Update(0);
+			// Remove Preview.
+			preview = nullptr;
+
+			if (shift) {
+			    UIBtnClicked(btnId, true);
+			    preview->shifting = true;
+			}
+
+			OnMouseMove(mx, my);
+		}
 	}
 }
+
 void PlayScene::OnKeyDown(int keyCode) {
 	IScene::OnKeyDown(keyCode);
 	if (keyCode == ALLEGRO_KEY_TAB) {
@@ -289,12 +405,12 @@ void PlayScene::OnKeyDown(int keyCode) {
 	}
 	if (keyCode == ALLEGRO_KEY_Q) {
 		// Hotkey for PlugGunTurret.
-		UIBtnClicked(0);
+		UIBtnClicked(0, false);
 	}
 	// TODO 3 (5/5): Make the W key to create the new turret.
 	else if (keyCode == ALLEGRO_KEY_W) {
 		// Hotkey for new turret.
-		UIBtnClicked(1);
+		UIBtnClicked(1, false);
 	}
 	else if (keyCode >= ALLEGRO_KEY_0 && keyCode <= ALLEGRO_KEY_9) {
 		// Hotkey for Speed up.
@@ -309,20 +425,24 @@ void PlayScene::OnKeyDown(int keyCode) {
         mute = !mute;
 	}
 }
+
 void PlayScene::Hit() {
     lives--;
 	UILives->Text = std::string("Life ") + std::to_string(lives);
-	if (lives <= 0) { /// [MYNOTE]: this was originally 0, but somehow won't identify lost when 0 lives
+	if (lives <= 0) {
 		Engine::GameEngine::GetInstance().ChangeScene("lose");
 	}
 }
+
 int PlayScene::GetMoney() const {
 	return money;
 }
+
 void PlayScene::EarnMoney(int money) {
 	this->money += money;
 	UIMoney->Text = std::string("$") + std::to_string(this->money);
 }
+
 void PlayScene::ReadMap() {
 	std::string filename = std::string("resources/map") + std::to_string(MapId) + ".txt";
 	// Read map file.
@@ -358,6 +478,7 @@ void PlayScene::ReadMap() {
 		}
 	}
 }
+
 void PlayScene::ReadEnemyWave() {
 	std::string filename = std::string("resources/enemy") + std::to_string(MapId) + ".txt";
 	// Read enemy file.
@@ -370,6 +491,7 @@ void PlayScene::ReadEnemyWave() {
 	}
 	fin.close();
 }
+
 void PlayScene::ConstructUI() {
 	// Background
 	UIGroup->AddNewObject(new Engine::Image("play/sand.png", 1280, 0, 320, 832));
@@ -381,6 +503,8 @@ void PlayScene::ConstructUI() {
 	ConstructButton(0, "play/turret-6.png", PlugGunTurret::Price);
 	// TODO 3 (3/5): Create a button to support constructing the new turret.
 	ConstructButton(1, "play/turret-1.png", MachineGunTurret::Price);
+	ConstructButton(2, "play/shovel.png", Shovel::Price);
+	ConstructButton(3, "play/shifter.png", Shifter::Price);
 
 	int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
 	int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
@@ -392,25 +516,32 @@ void PlayScene::ConstructUI() {
 
 void PlayScene::ConstructButton(int id, std::string sprite, int price) {
 	TurretButton* btn;
-	btn = new TurretButton("play/floor.png", "play/dirt.png",
-		Engine::Sprite("play/tower-base.png", 1294 + id * 76, 136, 0, 0, 0, 0),
-		Engine::Sprite(sprite, 1294 + id * 76, 136 - 8, 0, 0, 0, 0)
-		, 1294 + id * 76, 136, price);
+	int tmp_id = id % 4;
+    btn = new TurretButton("play/floor.png", "play/dirt.png",
+                    Engine::Sprite("play/tower-base.png", 1294 + tmp_id * 76, 136 + (id / 4) * 76, 0, 0, 0, 0),
+                    Engine::Sprite(sprite, 1294 + tmp_id * 76, 136 + (id / 4) * 76 - 8, 0, 0, 0, 0)
+                    , 1294 + tmp_id * 76, 136 + (id / 4) * 76, price);
 	// Reference: Class Member Function Pointer and std::bind.
-	btn->SetOnClickCallback(std::bind(&PlayScene::UIBtnClicked, this, id));
+	btn->SetOnClickCallback(std::bind(&PlayScene::UIBtnClicked, this, id, false));
 	UIGroup->AddNewControlObject(btn);
 }
 
-void PlayScene::UIBtnClicked(int id) {
+void PlayScene::UIBtnClicked(int id, bool ignoreMoney) {
 	if (preview) {
 		UIGroup->RemoveObject(preview->GetObjectIterator());
         preview = nullptr;
     }
-	if (id == 0 && money >= PlugGunTurret::Price)
+	if (id == 0 && (ignoreMoney || money >= PlugGunTurret::Price))
 		preview = new PlugGunTurret(0, 0);
 	// TODO 3 (4/5): On the new turret button callback, create the new turret.
-	else if (id == 1 && money >= MachineGunTurret::Price)
+	else if (id == 1 && (ignoreMoney || money >= MachineGunTurret::Price))
         preview = new MachineGunTurret(0, 0);
+    else if (id == 2)
+        preview = new Shovel(0, 0);
+    else if (id == 3)
+        preview = new Shifter(0, 0);
+    else if (id == 4 && (ignoreMoney || money >= DoubleGunTurret::Price))
+        preview = new DoubleGunTurret(0, 0);
 	if (!preview)
 		return;
 	preview->Position = Engine::GameEngine::GetInstance().GetMousePosition();
@@ -448,6 +579,7 @@ bool PlayScene::CheckSpaceValid(int x, int y) {
 		dynamic_cast<Enemy*>(it)->UpdatePath(mapDistance);
 	return true;
 }
+
 std::vector<std::vector<int>> PlayScene::CalculateBFSDistance() {
 	// Reverse BFS to find path.
 	std::vector<std::vector<int>> map(MapHeight, std::vector<int>(std::vector<int>(MapWidth, -1)));

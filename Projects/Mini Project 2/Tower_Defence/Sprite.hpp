@@ -7,6 +7,7 @@
 #include "Point.hpp"
 
 namespace Engine {
+
 	/// <summary>
 	/// Image that supports rotation, velocity, tint, and collision radius.
 	/// </summary>
@@ -14,12 +15,16 @@ namespace Engine {
 	public:
 		// Rotation angle in radians.
 		float Rotation;
+
 		// Pixel in seconds.
 		Point Velocity;
+
 		// Color tint.
 		ALLEGRO_COLOR Tint;
+
 		// Assume a circle is a good approximation of the sprite's boundary.
 		float CollisionRadius = 0;
+
 		/// <summary>
 		/// Construct a sprite object.
 		/// </summary>
@@ -39,11 +44,13 @@ namespace Engine {
 		/// <param name="a">Color tint alpha value.</param>
 		explicit Sprite(std::string img, float x, float y, float w = 0, float h = 0, float anchorX = 0.5f, float anchorY = 0.5f,
 			float rotation = 0, float vx = 0, float vy = 0, unsigned char r = 255, unsigned char g = 255, unsigned char b = 255, unsigned char a = 255);
+
 		/// <summary>
 		/// Draw to window display.
 		/// This is called when the game should redraw the window.
 		/// </summary>
 		void Draw() const override;
+
 		/// <summary>
 		/// Run game logic such as updating the world, checking for collision, and so on.
 		/// This is called when the game should update its logic, usually 'fps' times per second.

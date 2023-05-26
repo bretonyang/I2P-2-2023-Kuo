@@ -15,12 +15,14 @@
 PlayScene* Turret::getPlayScene() {
 	return dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetActiveScene());
 }
+
 Turret::Turret(std::string imgBase, std::string imgTurret, float x, float y, float radius, int price, float coolDown) :
 	Sprite(imgTurret, x, y), price(price), coolDown(coolDown), imgBase(imgBase, x, y) {
 	CollisionRadius = radius;
 }
+
 void Turret::Update(float deltaTime) {
-	Sprite::Update(deltaTime);
+	Sprite::Update(deltaTime); // check to move
 	PlayScene* scene = getPlayScene();
 	imgBase.Position = Position;
 	imgBase.Tint = Tint;
@@ -52,18 +54,20 @@ void Turret::Update(float deltaTime) {
 		Engine::Point originRotation = Engine::Point(cos(Rotation - ALLEGRO_PI / 2), sin(Rotation - ALLEGRO_PI / 2));
 		Engine::Point targetRotation = (Target->Position - Position).Normalize();
 		float maxRotateRadian = rotateRadian * deltaTime;
-		float cosTheta = originRotation.Dot(targetRotation);
+
+		float cosTheta = originRotation.Dot(targetRotation); // dot product
 		// Might have floating-point precision error.
 		if (cosTheta > 1) cosTheta = 1;
 		else if (cosTheta < -1) cosTheta = -1;
-		float radian = acos(cosTheta);
+
+		float radian = acos(cosTheta); // i.e., Theta in radian
 		Engine::Point rotation;
 		if (abs(radian) <= maxRotateRadian)
 			rotation = targetRotation;
 		else
 			rotation = ((abs(radian) - maxRotateRadian) * originRotation + maxRotateRadian * targetRotation) / radian;
 		// Add 90 degrees (PI/2 radian), since we assume the image is oriented upward.
-		Rotation = atan2(rotation.y, rotation.x) + ALLEGRO_PI / 2;
+		Rotation = atan2(rotation.y, rotation.x) + ALLEGRO_PI / 2; // Rotation angle in radian
 		// Shoot reload.
 		reload -= deltaTime;
 		if (reload <= 0) {
@@ -73,6 +77,7 @@ void Turret::Update(float deltaTime) {
 		}
 	}
 }
+
 void Turret::Draw() const {
 	if (Preview) {
 		al_draw_filled_circle(Position.x, Position.y, CollisionRadius, al_map_rgba(0, 255, 0, 50));
@@ -84,6 +89,7 @@ void Turret::Draw() const {
 		al_draw_circle(Position.x, Position.y, CollisionRadius, al_map_rgb(0, 0, 255), 2);
 	}
 }
+
 int Turret::GetPrice() const {
 	return price;
 }

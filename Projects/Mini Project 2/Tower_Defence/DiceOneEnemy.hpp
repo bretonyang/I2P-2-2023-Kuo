@@ -3,6 +3,7 @@
 
 #include "Enemy.hpp"
 
+// enemy id = 2
 class DiceOneEnemy : public Enemy {
 public:
     DiceOneEnemy(int x, int y);

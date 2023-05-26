@@ -19,8 +19,12 @@ protected:
 	float hp;
 	float slowRemainTime;
 	int money;
+
+	bool diceTwoSummonBefore = true;
+	std::string name;
 	PlayScene* getPlayScene();
 	virtual void OnExplode();
+
 public:
 	float reachEndTime;
 	std::list<Turret*> lockedTurrets;

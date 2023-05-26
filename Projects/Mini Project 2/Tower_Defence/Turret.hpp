@@ -24,6 +24,12 @@ protected:
 public:
     bool Enabled = true;
     bool Preview = false;
+
+    bool isShovel = false;
+    bool isShifter = false;
+    bool shifting = false;
+    std::string type;
+
     Enemy* Target = nullptr;
     Turret(std::string imgBase, std::string imgTurret, float x, float y, float radius, int price, float coolDown);
     void Update(float deltaTime) override;

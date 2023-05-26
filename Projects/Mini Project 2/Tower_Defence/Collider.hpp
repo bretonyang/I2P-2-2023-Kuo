@@ -5,12 +5,14 @@
 
 namespace Engine {
 	struct Point;
+
 	/// <summary>
 	/// Helper class for calculating physical collision, overlap, point in region.
 	/// Note: Implementing a physical engine is an overkill in this game, helper class is much simpler.
 	/// </summary>
 	struct Collider final {
 		explicit Collider() = delete;
+
 		/// <summary>
 		/// Check if the bitmap pixel is opaque. (non-transparent)
 		/// </summary>
@@ -18,6 +20,7 @@ namespace Engine {
 		/// <param name="bmp">The target bitmap.</param>
 		/// <returns>Determines whether the pixel of the bitmap is opaque.</returns>
 		static bool IsPointInBitmap(Point pnt, const std::shared_ptr<ALLEGRO_BITMAP>& bmp);
+
 		/// <summary>
 		/// Check if point is within rectangle region.
 		/// </summary>
@@ -26,6 +29,7 @@ namespace Engine {
 		/// <param name="rectSize">The rectangle size. (width, height)</param>
 		/// <returns>Determines whether the pixel is in the rectangle.</returns>
 		static bool IsPointInRect(Point pnt, Point rectPos, Point rectSize);
+
 		/// <summary>
 		/// Check if two rectangle overlaps.
 		/// </summary>
@@ -35,6 +39,7 @@ namespace Engine {
 		/// <param name="rect2p2">Bottom-Right coordinate of the second rectangle.</param>
 		/// <returns>Determines whether the two rectangles overlaps.</returns>
 		static bool IsRectOverlap(Point rect1p1, Point rect1p2, Point rect2p1, Point rect2p2);
+
 		/// <summary>
 		/// Check if two circle overlaps.
 		/// </summary>
@@ -44,6 +49,7 @@ namespace Engine {
 		/// <param name="r2">The radius of the second circle.</param>
 		/// <returns>Determines whether the two circles overlaps.</returns>
 		static bool IsCircleOverlap(Point c1, float r1, Point c2, float r2);
+
 	};
 }
 #endif // COLLIDER_HPP

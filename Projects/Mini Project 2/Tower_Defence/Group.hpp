@@ -7,6 +7,7 @@
 #include "IObject.hpp"
 
 namespace Engine {
+
 	/// <summary>
 	/// A ControlObject Group that can contain other objects or controls.
 	/// </summary>
@@ -15,25 +16,30 @@ namespace Engine {
 		// Stores all object pointers in the scene.
 		// The first boolean indicates whether the scene should delete it.
 		std::list<std::pair<bool, IObject*>> objects;
+
 		// Stores all control pointers in the scene.
 		// The first boolean indicates whether the scene should delete it.
 		std::list<std::pair<bool, IControl*>> controls;
+
 		// Note: Using linked-list and inline-new might cause some serious cache misses,
 		//       however this implementation brings us more convenience than the impact
 		//       on performance. Trying to deal with cache misses requires complicated code,
 		//       so we'll just ignore it for simplicity.
+
 		/// <summary>
 		/// Add Object to scene.
 		/// </summary>
 		/// <param name="shouldDelete">Indicates whether the scene handle the Object deletion for you.</param>
 		/// <param name="obj">The Object to add.</param>
 		void addObject(bool shouldDelete, IObject* obj);
+
 		/// <summary>
 		/// Add Control to scene.
 		/// </summary>
 		/// <param name="shouldDelete">Indicates whether the scene handle the Control deletion for you.</param>
 		/// <param name="ctrl">The Control to add.</param>
 		void addControl(bool shouldDelete, IControl* ctrl);
+
 		/// <summary>
 		/// Insert Object to scene before the iterator.
 		/// </summary>
@@ -41,6 +47,7 @@ namespace Engine {
 		/// <param name="obj">The Object to insert.</param>
 		/// <param name="it">The iterator that the object should insert before.</param>
 		void insertObject(bool shouldDelete, IObject* obj, std::list<std::pair<bool, IObject*>>::iterator it);
+
 	public:
 		/// <summary>
 		/// Create an empty group.
@@ -58,10 +65,12 @@ namespace Engine {
 		/// The default virtual destructor to support polymorphism destruction.
 		/// </summary>
 		virtual ~Group();
+
 		/// <summary>
 		/// Remove all children (objects and controls).
 		/// </summary>
 		void Clear();
+
 		/// <summary>
 		/// Run game logic such as updating the world, checking for collision, and so on.
 		/// This is called when the game should update its logic, usually 'fps' times per second.
@@ -69,12 +78,14 @@ namespace Engine {
 		/// </summary>
 		/// <param name="deltaTime">Time elapsed since last update, can be used to calculate value changes.</param>
 		void Update(float deltaTime) override;
+
 		/// <summary>
 		/// Draw to window display.
 		/// This is called when the game should redraw the window.
 		/// Delegate the draw event to all visible objects.
 		/// </summary>
 		void Draw() const override;
+
 		/// <summary>
 		/// Delegate the key down event to all controls.
 		/// </summary>
@@ -112,6 +123,7 @@ namespace Engine {
 		/// <param name="my">Mouse y coordinate in window space.</param>
 		/// <param name="delta">Mouse z scroll delta value.</param>
 		void OnMouseScroll(int mx, int my, int delta) override;
+
 		/// <summary>
 		/// Remove the Object from this scene.
 		/// </summary>
@@ -128,6 +140,7 @@ namespace Engine {
 		/// <param name="ctrlIt">The iterator of the Control.</param>
 		/// <param name="objIt">The iterator of the Object.</param>
 		void RemoveControlObject(std::list<std::pair<bool, IControl*>>::iterator ctrlIt, std::list<std::pair<bool, IObject*>>::iterator objIt);
+
 		/// <summary>
 		/// Add Object to scene.
 		/// Use inline-new when adding Object in order to support polymorphism,
@@ -186,6 +199,7 @@ namespace Engine {
 		/// </summary>
 		/// <param name="ctrl">The ControlObject to add.</param>
 		void AddRefControlObject(IControl& ctrl);
+
 		/// <summary>
 		/// Get all objects.
 		/// </summary>

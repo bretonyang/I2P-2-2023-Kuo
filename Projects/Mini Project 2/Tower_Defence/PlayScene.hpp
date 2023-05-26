@@ -27,10 +27,12 @@ private:
 	ALLEGRO_SAMPLE_ID bgmId;
 	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
 	std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
+
 protected:
 	int lives;
 	int money;
 	int SpeedMult;
+
 public:
 	static bool DebugMode;
 	static const std::vector<Engine::Point> directions;
@@ -39,7 +41,7 @@ public:
 	static const float DangerTime;
 	static const Engine::Point SpawnGridPoint;
 	static const Engine::Point EndGridPoint;
-	static const std::vector<int> code;
+	static const std::vector<int> code; // cheatcode UDLRLR\n
 	bool mute;
 	int MapId;
 	float ticks;
@@ -55,13 +57,15 @@ public:
 	Group* UIGroup;
 	Engine::Label* UIMoney;
 	Engine::Label* UILives;
-	Engine::Image* imgTarget;
+	Engine::Image* imgTarget; // Turret placing target
 	Engine::Sprite* dangerIndicator;
 	Turret* preview;
 	std::vector<std::vector<TileType>> mapState;
 	std::vector<std::vector<int>> mapDistance;
+    std::list<Engine::Point> deathCoordinates; // for recording DiceTwoDeathCoords
 	std::list<std::pair<int, float>> enemyWaveData;
 	std::list<int> keyStrokes;
+    Turret* turretArray[13][20] = {}; // height 13, width 20
 	static Engine::Point GetClientSize();
 	explicit PlayScene() = default;
 	void Initialize() override;
@@ -79,7 +83,7 @@ public:
 	void ReadEnemyWave();
 	void ConstructUI();
 	void ConstructButton(int id, std::string sprite, int price);
-	void UIBtnClicked(int id);
+	void UIBtnClicked(int id, bool ignoreMoney);
 	bool CheckSpaceValid(int x, int y);
 	std::vector<std::vector<int>> CalculateBFSDistance();
 	// void ModifyReadMapTiles();
