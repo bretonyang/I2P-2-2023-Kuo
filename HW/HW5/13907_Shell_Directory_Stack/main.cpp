@@ -11,21 +11,20 @@ vector<vector<string>> commands;
 map<string, vector<string>> parentOfDir;
 
 vector<string> parse(string path) {
-    vector<string> result;
+    list<string> result;
     string word;
     stringstream ss(path);
     while (getline(ss, word, '/')) {
         result.push_back(word);
     }
-    if (result.size() == 0 && result[0] == "") {
-        result[0] = "/";
+    if (result[0] == "") {
+        result.push_front("/");
     }
     else if (result.size() > 0) {
-        if (result[0] == "") {
 
-        }
     }
-    return result;
+    vector<string> res(begin(result), end(result));
+    return res;
 }
 
 /**
