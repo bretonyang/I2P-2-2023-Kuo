@@ -1,36 +1,58 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <list>
+#include <cmath>
 #include <algorithm>
 
 using namespace std;
 
-// Example class with overloaded () operator
-class MyCallable {
+/* Helper code */
+
+template <class T>
+void print_sequence(T seq) {
+    for (auto i : seq)
+        cout << i << ' ';
+    cout << endl;
+}
+
+
+/* Testing code */
+
+class Node {
 public:
-    int operator()(int x, int y) {
-        return x + y;
-    }
-
-    double operator()(double x, double y) {
-        return x * y;
-    }
-
-    const string operator()(const string str) {
-        return str + " STRING ADD-ON!!!";
-    }
+    int val;
+    Node(int val) : val(val) {}
 };
 
-int main() {
-    MyCallable myCallable;
+ostream& operator<<(ostream &out, const Node &n) {
+    return out << n.val;
+}
 
-    int result1 = myCallable(3, 4);
-    cout << "3 + 4 is: " << result1 << endl;
+void test(vector<Node> &seq) {
+    seq.push_back(Node(-1));
+}
 
-    double result2 = myCallable(2.5, 1.5);
-    cout << "2.5 * 1.5 is: " << result2 << endl;
 
-    const string result3 = myCallable("Hello, world!");
-    cout << "str postfixed: " << result3 << endl;
+int main()
+{
+    list<vector<int>> l1;
+    list<vector<int>> l2;
+    vector<int>v1{1, 2, 3};
+    l1.push_back(v1);
+    l2.push_back(v1);
+    vector<int>v2{2, 3};
+    l1.push_back(v2);
+    l2.push_back(v2);
+    vector<int>v3{5};
+    vector<int>v4{5};
+    l1.push_back(v3);
+    l2.push_back(v4);
+
+    cout << (l1 == l2) << endl;
 
     return 0;
 }
