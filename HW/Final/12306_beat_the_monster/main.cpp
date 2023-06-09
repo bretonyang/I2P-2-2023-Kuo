@@ -2,15 +2,24 @@
 
 using namespace std;
 
-//struct ArrayHasher {
-//    int operator()(const array<int, 3> &V) const {
-//        int hash = V.size();
-//        for(auto &i : V) {
-//            hash ^= i + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+struct ArrayHasher {
+    int operator()(const array<int, 3> &V) const {
+
+        /// Naive hash: 1400ms
+//        int hash = 1;
+//        for (auto &i : V) {
+//            hash = (hash << 5) - hash + i;
 //        }
-//        return hash;
-//    }
-//};
+
+        /// Stackoverflow hash: 800ms
+        int hash = V.size();
+        for(auto &i : V) {
+            hash ^= i + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+
+        return hash;
+    }
+};
 
 class Game {
     using State = array<int, 3>; // level, HP, monster_HP
@@ -64,15 +73,23 @@ private:
         q.push(s);
         distTo[s[0]][s[1]][s[2]] = 0;
         visited[s[0]][s[1]][s[2]] = true;
+//        distTo[s] = 0;
+//        visited[s] = true;
 
         while (!q.empty()) {
             State v = q.front();
             q.pop();
             int distToV = distTo[v[0]][v[1]][v[2]];
+//            int distToV = distTo[v];
 
             if (isGoal(v)) return distToV;
 
             for (State w : neighbors(v)) {
+//                if (!visited[w]) {
+//                    visited[w] = true;
+//                    distTo[w] = distToV + 1;
+//                    q.push(w);
+//                }
                 if (!visited[w[0]][w[1]][w[2]]) {
                     visited[w[0]][w[1]][w[2]] = true;
                     distTo[w[0]][w[1]][w[2]] = distToV + 1;
