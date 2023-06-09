@@ -1,58 +1,32 @@
 #include <iostream>
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
-#include <queue>
-#include <list>
-#include <cmath>
-#include <algorithm>
 
 using namespace std;
 
-/* Helper code */
-
-template <class T>
-void print_sequence(T seq) {
-    for (auto i : seq)
-        cout << i << ' ';
-    cout << endl;
-}
-
-
-/* Testing code */
-
-class Node {
+class base {
 public:
-    int val;
-    Node(int val) : val(val) {}
+    virtual void print() {
+        cout << "base" << endl;
+    }
 };
 
-ostream& operator<<(ostream &out, const Node &n) {
-    return out << n.val;
-}
+class deri1 : public base {
+public:
+    void print() {
+        cout << "deri1" << endl;
+    }
+};
 
-void test(vector<Node> &seq) {
-    seq.push_back(Node(-1));
-}
-
+class deri2 : public deri1 {
+public:
+    void print() {
+        cout << "deri2" << endl;
+    }
+};
 
 int main()
 {
-    list<vector<int>> l1;
-    list<vector<int>> l2;
-    vector<int>v1{1, 2, 3};
-    l1.push_back(v1);
-    l2.push_back(v1);
-    vector<int>v2{2, 3};
-    l1.push_back(v2);
-    l2.push_back(v2);
-    vector<int>v3{5};
-    vector<int>v4{5};
-    l1.push_back(v3);
-    l2.push_back(v4);
-
-    cout << (l1 == l2) << endl;
+    base *p = new deri2();
+    ((deri1*)p)->print();
 
     return 0;
 }
