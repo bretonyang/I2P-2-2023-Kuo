@@ -32,7 +32,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="13504.cpp" />
+		<Unit filename="function.cpp" />
+		<Unit filename="function.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

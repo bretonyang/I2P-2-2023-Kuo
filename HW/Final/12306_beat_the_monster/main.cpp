@@ -2,17 +2,6 @@
 
 using namespace std;
 
-struct ArrayHasher {
-    size_t operator()(const array<int, 3>& a) const {
-        size_t h = 0;
-
-        for (auto e : a) {
-            h ^= hash<int>{}(e)  + 0x9e3779b9 + (h << 6) + (h >> 2);
-        }
-        return h;
-    }
-};
-
 class Game {
     using State = array<int, 3>; // level, HP, monster_HP
 private:
@@ -20,27 +9,32 @@ private:
     int maxHP;
     int monsterDamage;
     vector<vector<int>> table; // vector of "damage" and "Heal"
+    int distTo[16][301][401] = {};
+    bool visited[16][301][401] = {};
     State initState;
 
     vector<State> neighbors(State s) {
+        // since player starts first, so we should check playerHP in the following
         s[1] -= monsterDamage;
         vector<State> res;
 
         // ATTACK
-        res.push_back({s[0], s[1], s[2] - table[s[0]][0]});
+        int monsterHP = max(0, s[2] - table[s[0]][0]);
+        if (monsterHP <= 0)
+            res.push_back(State{s[0], s[1] + monsterDamage, monsterHP}); // our attack kills monster first
+        else if (s[1] > 0)
+            res.push_back(State{s[0], s[1], monsterHP});
 
         // HEAL
         int newHP = s[1] + table[s[0]][1];
-        if (newHP <= maxHP)
-            res.push_back({s[0], newHP, s[2]});
-        else
-            res.push_back(s);
+        if (newHP > 0 && newHP <= maxHP)
+            res.push_back(State{s[0], newHP, s[2]});
 
         // LEVEL-UP
-        if (s[0] < maxLevel)
-            res.push_back({s[0] + 1, s[1], s[2]});
-        else
-            res.push_back(s);
+        if (s[1] > 0) {
+            if (s[0] + 1 <= maxLevel)
+                res.push_back(State{s[0] + 1, s[1], s[2]});
+        }
 
         return res;
     }
@@ -50,26 +44,24 @@ private:
     }
 
     int bfs(State s) {
-        // NOTE: using vector<int> as key type for unordered_map requires custom hash function!
-        unordered_map<State, int, ArrayHasher> distTo;
+//        unordered_map<State, int, ArrayHasher> distTo;
+//        unordered_map<State, bool, ArrayHasher> visited;
         queue<State> q;
-        unordered_map<State, bool, ArrayHasher> visited;
         q.push(s);
-        distTo[s] = 0;
-        visited[s] = true;
+        distTo[s[0]][s[1]][s[2]] = 0;
+        visited[s[0]][s[1]][s[2]] = true;
+
         while (!q.empty()) {
             State v = q.front();
             q.pop();
-            int distToV = distTo[v];
+            int distToV = distTo[v[0]][v[1]][v[2]];
 
-            if (isGoal(v)) {
-                return distToV;
-            }
+            if (isGoal(v)) return distToV;
 
             for (State w : neighbors(v)) {
-                if (!visited[w]) {
-                    visited[w] = true;
-                    distTo[w] = distToV + 1;
+                if (!visited[w[0]][w[1]][w[2]]) {
+                    visited[w[0]][w[1]][w[2]] = true;
+                    distTo[w[0]][w[1]][w[2]] = distToV + 1;
                     q.push(w);
                 }
             }
@@ -79,12 +71,11 @@ private:
 
 public:
     Game(int l, int hp, int mhp, int mdmg, vector<vector<int>> t) :
-        maxLevel(l), maxHP(hp), monsterDamage(mdmg), table(t), initState({1, hp, mhp}) {}
+        maxLevel(l - 1), maxHP(hp), monsterDamage(mdmg), table(t), initState({0, hp, mhp}) {}
 
     int minStepsToWin() {
         return bfs(initState);
     }
-
 };
 
 int main()
@@ -96,7 +87,7 @@ int main()
         cin >> table[i][0] >> table[i][1];
 
     Game g(L, HP, MHP, MDMG, table);
-    cout << g.minStepsToWin() + 1 << endl;
+    cout << g.minStepsToWin() << endl;
 
     return 0;
 }
