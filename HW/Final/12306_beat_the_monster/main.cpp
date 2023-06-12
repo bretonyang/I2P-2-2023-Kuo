@@ -69,6 +69,8 @@ private:
         /// It actually makes sense, since HashMaps are "amortized" contant vs. "always" constant by arrays
 //        unordered_map<State, int, ArrayHasher> distTo;
 //        unordered_map<State, bool, ArrayHasher> visited;
+//        map<State, int> distTo;
+//        map<State, bool> visited;
         queue<State> q;
         q.push(s);
         distTo[s[0]][s[1]][s[2]] = 0;

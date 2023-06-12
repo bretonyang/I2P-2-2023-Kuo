@@ -7,7 +7,7 @@ vector<int> pathOfLIS(vector<int>& nums) {
     vector<int> trace(nums.size(), -1); // trace[i] point to the index of previous number in LIS
 
     for (int i = 0; i < nums.size(); ++i) {
-        if (sub.empty() || nums[i] > sub.back()) {
+        if (sub.empty() || sub.back() < nums[i]) {
             if (!sub.empty())
                 trace[i] = subIndex.back();
             sub.push_back(nums[i]);
@@ -34,10 +34,16 @@ vector<int> pathOfLIS(vector<int>& nums) {
     return path;
 }
 
-int main() {
-    vector<int> nums = {2, 6, 8, 3, 4, 5, 1};
-    vector<int> res = pathOfLIS(nums); // [2, 3, 4, 5]
-    for (int x : res)
-        cout << x << " ";
+int main()
+{
+    int N;
+    cin >> N;
+    vector<int> seq(N);
+    for (int i = 0; i < N; i++)
+        cin >> seq[i];
+
+    vector<int> LIS = pathOfLIS(seq);
+    cout << LIS.size() << endl;
+
     return 0;
 }
