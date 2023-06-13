@@ -2,32 +2,33 @@
 
 using namespace std;
 
-vector<int> pathOfLIS(vector<int>& nums) {
-    vector<int> sub, subIndex; // Store index instead of value for tracing path purpose
-    vector<int> trace(nums.size(), -1); // trace[i] point to the index of previous number in LIS
+vector<int> pathOfLIS(vector<int>& seq) {
+    vector<int> subseq;
+    vector<int> indexOfSubseq;
+    vector<int> edgeTo(seq.size(), -1);
 
-    for (int i = 0; i < nums.size(); ++i) {
-        if (sub.empty() || sub.back() < nums[i]) {
-            if (!sub.empty())
-                trace[i] = subIndex.back();
-            sub.push_back(nums[i]);
-            subIndex.push_back(i);
+    for (int i = 0; i < seq.size(); i++) {
+        if (subseq.empty() || seq[i] > subseq.back()) {
+            if (!subseq.empty())
+                edgeTo[i] = indexOfSubseq.back();
+            subseq.push_back(seq[i]);
+            indexOfSubseq.push_back(i);
         }
         else {
-            int idx = lower_bound(begin(sub), end(sub), nums[i]) - begin(sub);
+            int idx = lower_bound(begin(subseq), end(subseq), seq[i]) - begin(subseq);
             if (idx > 0)
-                trace[i] = subIndex[idx - 1];
-            sub[idx] = nums[i];
-            subIndex[idx] = i;
+                edgeTo[i] = indexOfSubseq[idx - 1];
+            subseq[idx] = seq[i];
+            indexOfSubseq[idx] = i;
         }
     }
 
+    // follow the edgeTo to get back the LIS
     vector<int> path;
-    int t = subIndex.back();
-
-    while (t != -1) {
-        path.push_back(nums[t]);
-        t = trace[t];
+    int tmp = indexOfSubseq.back();
+    while (tmp != -1) {
+        path.push_back(seq[tmp]);
+        tmp = edgeTo[tmp];
     }
     reverse(begin(path), end(path));
 

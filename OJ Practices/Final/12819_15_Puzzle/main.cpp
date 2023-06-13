@@ -60,40 +60,42 @@ int manhattan(State s) {
 int nLinearConflicts(State s) {
     int conflicts = 0;
 
-    // setup for later convenient comparison
-    vector<int> pR(N * N + 1);
-    vector<int> pC(N * N + 1);
+    // precalculate the correct (row, col) for each value
+    vector<int> rowPosOfVal(N * N);
+    vector<int> colPosOfVal(N * N);
     for (int r = 0; r < N; r++) {
         for (int c = 0; c < N; c++) {
-            pR[s[r * N + c]] = r;
-            pC[s[r * N + c]] = c;
+            rowPosOfVal[s[r * N + c]] = r;
+            colPosOfVal[s[r * N + c]] = c;
         }
     }
 
     // row conflicts
-    for (int r = 0; r < N; r++) {
-        for (int cl = 0; cl < N; cl++) {
-            for (int cr = cl + 1; cr < N; cr++) {
+    for (int r = 0; r < N; r++) { // row
+        for (int cl = 0; cl < N; cl++) { // col pointer at left
+            for (int cr = cl + 1; cr < N; cr++) { // col pointer at right
                 int goalValAt_r_cl = r * N + cl + 1;
                 int goalValAt_r_cr = r * N + cr + 1;
-                if (goalValAt_r_cl && goalValAt_r_cr
-                    && r == pR[goalValAt_r_cl] && pR[goalValAt_r_cl] == pR[goalValAt_r_cr]
-                    && pC[goalValAt_r_cl] > pC[goalValAt_r_cr]) {
+                if (goalValAt_r_cl != 0 && goalValAt_r_cr != 0  // ignore 0 tile
+                    && r == rowPosOfVal[goalValAt_r_cl]     // means goalValAt_r_cl is at its goal position row
+                    && r == rowPosOfVal[goalValAt_r_cr]   // goal position of vals to check are on the same row
+                    && colPosOfVal[goalValAt_r_cl] > colPosOfVal[goalValAt_r_cr]) { // goal col position of vals to check are conflicted (left > right)
                     conflicts++;
                 }
             }
         }
     }
 
-    // column conflicts -
-    for (int c = 0; c < N; c++) {
-        for (int rU = 0; rU < N; rU++) {
-            for (int rD = rU + 1; rD < N; rD++) {
+    // column conflicts
+    for (int c = 0; c < N; c++) { // col
+        for (int rU = 0; rU < N; rU++) { // row pointer at upper
+            for (int rD = rU + 1; rD < N; rD++) { // row pointer at down
                 int goalValAt_rU_c = rU * N + c + 1;
                 int goalValAt_rD_c = rD * N + c + 1;
-                if (goalValAt_rU_c && goalValAt_rD_c
-                    && c == pC[goalValAt_rU_c] && pC[goalValAt_rU_c] == pC[goalValAt_rD_c]
-                    && pR[goalValAt_rU_c] > pR[goalValAt_rD_c]) {
+                if (goalValAt_rU_c != 0 && goalValAt_rD_c != 0
+                    && c == colPosOfVal[goalValAt_rU_c]     // goalValAt_rU_c is at correct column
+                    && c == colPosOfVal[goalValAt_rD_c]   // goalValAt_rD_c is also at the correct column
+                    && rowPosOfVal[goalValAt_rU_c] > rowPosOfVal[goalValAt_rD_c]) { // but their row position is conflicted
                     conflicts++;
                 }
             }
@@ -112,9 +114,10 @@ int astar(State s) {
     map<State, int> distTo;
     priority_queue<pqPair, vector<pqPair>, greater<pqPair>> q;
     map<State, bool> visited;
-//    map<State, int> heuristicTable;
+
     q.push(make_pair(0, s));
     distTo[s] = 0;
+
     while (!q.empty()) {
         State v = q.top().second;
         q.pop();
@@ -129,10 +132,6 @@ int astar(State s) {
         for (State w : neighbors(v)) {
             if (distTo.find(w) == end(distTo) || distToV + 1 < distTo[w]) {
                 distTo[w] = distToV + 1;
-                /// Somehow, below is runtime error
-//                if (heuristicTable.find(w) == end(heuristicTable)) {
-//                    heuristicTable[w] = h(w);
-//                }
                 q.push(make_pair(distToV + 1 + h(w), w));
             }
         }
